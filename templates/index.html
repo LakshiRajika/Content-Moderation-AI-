@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Content Moderation Engine</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles to ensure the container scales nicely and provide dark mode feel */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Dark background */
+        }
+        .text-input-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        /* Custom colors for score rings/bars (optional, Tailwind is preferred) */
+        .high-risk { color: #f56565; } /* red-500 */
+        .medium-risk { color: #f6ad55; } /* orange-400 */
+        .low-risk { color: #48bb78; } /* green-500 */
+        
+        /* Ensures the grid flows correctly on mobile */
+        @media (max-width: 640px) {
+            .scores-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <!-- Link to the CSS file for custom overrides -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Ensure your script.js is linked -->
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+<body class="min-h-screen p-4 sm:p-8">
+
+    <div class="max-w-4xl mx-auto bg-gray-800 shadow-2xl rounded-xl p-6 sm:p-10 border border-gray-700">
+        
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                AI Content Moderation <span class="text-blue-400">Engine</span>
+            </h1>
+            <p class="text-gray-400 mt-2">Analyze text and images for safety compliance in real-time.</p>
+        </header>
+
+        <!-- Moderation Input Form -->
+        <section class="mb-10">
+            <form id="moderation-form" enctype="multipart/form-data" class="space-y-4">
+                
+                <!-- Text Input -->
+                <div class="text-input-group">
+                    <label for="content-input" class="block text-sm font-medium text-gray-300 mb-2">Enter a Text or an Image:</label>
+                    <textarea id="content-input" rows="5" placeholder="Enter text content here (optional)..."
+                              class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg p-3 focus:ring-blue-500 focus:border-blue-500 transition duration-150"></textarea>
+                </div>
+
+                <!-- File Upload (Styled via custom CSS/Label) -->
+                <div class="file-upload-container">
+                    <!-- This is the custom-styled button the user sees -->
+                    <label for="image-input" class="custom-file-upload">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        <span id="file-name-display">Choose Image (Optional)</span>
+                    </label>
+                    <!-- This is the actual hidden file input -->
+                    <input type="file" id="image-input" accept="image/*">
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit"
+                        class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition duration-200 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50">
+                    CLASSIFY CONTENT
+                </button>
+            </form>
+        </section>
+
+        <!-- Results Display Area -->
+        <section id="results-container">
+            <h2 class="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Analysis Results</h2>
+            
+            <!-- Status Message -->
+            <p id="status-message" class="text-center italic text-gray-400 mb-6">Enter content and click 'CLASSIFY CONTENT' to begin analysis.</p>
+
+            <!-- Classification Scores Grid -->
+            <div class="scores-grid grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                <!-- Normal Score (Primary Metric) -->
+                <div class="p-4 bg-gray-700 rounded-lg shadow-inner border border-gray-600">
+                    <p class="text-sm font-medium text-gray-400">Normal Content</p>
+                    <p class="text-3xl font-bold mt-1" id="score-normal">--</p>
+                </div>
+                
+                <!-- Harmful Scores -->
+                <div class="p-4 bg-gray-700 rounded-lg shadow-inner border border-gray-600">
+                    <p class="text-sm font-medium text-gray-400">Hate Speech</p>
+                    <p class="text-xl font-bold mt-1 high-risk" id="score-hate_speech">--</p>
+                </div>
+                
+                <div class="p-4 bg-gray-700 rounded-lg shadow-inner border border-gray-600">
+                    <p class="text-sm font-medium text-gray-400">Threat/Harassment</p>
+                    <p class="text-xl font-bold mt-1 medium-risk" id="score-threat">--</p>
+                </div>
+
+                <div class="p-4 bg-gray-700 rounded-lg shadow-inner border border-gray-600">
+                    <p class="text-sm font-medium text-gray-400">Violence</p>
+                    <p class="text-xl font-bold mt-1" id="score-violence">--</p>
+                </div>
+
+                <div class="p-4 bg-gray-700 rounded-lg shadow-inner border border-gray-600">
+                    <p class="text-sm font-medium text-gray-400">Profanity</p>
+                    <p class="text-xl font-bold mt-1" id="score-profanity">--</p>
+                </div>
+
+                <div class="p-4 bg-gray-700 rounded-lg shadow-inner border border-gray-600">
+                    <p class="text-sm font-medium text-gray-400">Sexual Content</p>
+                    <p class="text-xl font-bold mt-1" id="score-sexual">--</p>
+                </div>
+
+                <div class="p-4 bg-gray-700 rounded-lg shadow-inner border border-gray-600">
+                    <p class="text-sm font-medium text-gray-400">Spam</p>
+                    <p class="text-xl font-bold mt-1" id="score-spam">--</p>
+                </div>
+            </div>
+            
+            <!-- Risk Summary -->
+           <!-- <div class="risk-info p-6 bg-gray-900 rounded-lg border border-red-500/30">
+                <h3 class="text-xl font-semibold text-red-400 mb-3">Moderation Decision</h3>
+                <div class="grid grid-cols-3 gap-4 text-gray-300">
+                    <div>
+                        <span class="text-sm font-medium block text-gray-500">Risk Level</span>
+                        <span id="risk-level" class="text-lg font-bold">--</span>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium block text-gray-500">Recommended Action</span>
+                        <span id="action-actions" class="text-lg font-bold">--</span>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium block text-gray-500">Audit ID</span>
+                        <span id="audit-id" class="text-lg font-bold truncate">--</span>
+                    </div>
+                </div>
+            </div>-->
+        </section>
+
+    </div>
+</body>
+</html>
