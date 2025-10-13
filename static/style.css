@@ -1,54 +1,37 @@
-/*
- * This file contains custom overrides and non-Tailwind specific styles.
- * Primary styling is handled in index.html using Tailwind CSS classes.
- */
-
-/* 1. Attractive File Upload Styles */
 .file-upload-container {
     margin-bottom: 15px;
 }
-
-/* Hide the ugly default file input */
 #image-input {
     display: none;
 }
-
-/* Style the custom label as a prominent button/field */
 .custom-file-upload {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     padding: 12px;
-    
-    /* Using custom colors for the button based on the dark theme */
-    background-color: #374151; /* gray-700 */
-    color: #93c5fd; /* blue-300 */
-    border: 1px dashed #6b7280; /* gray-500 dashed border */
-    border-radius: 0.5rem; /* rounded-lg */
-    
+    background-color: #374151;
+    color: #93c5fd;
+    border: 1px dashed #6b7280;
+    border-radius: 0.5rem;
     cursor: pointer;
     font-size: 1rem;
     font-weight: 500;
     transition: background-color 0.2s, border-color 0.2s;
 }
-
 .custom-file-upload:hover {
-    background-color: #4b5563; /* slightly darker on hover */
-    border-color: #3b82f6; /* blue-500 hover border */
+    background-color: #4b5563;
+    border-color: #3b82f6;
 }
-
 #file-name-display {
     font-style: italic;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: calc(100% - 30px); /* Adjust max width to keep icon visible */
+    max-width: calc(100% - 30px);
 }
-
-/* 2. Responsive adjustments for the Risk Summary block */
 @media (max-width: 640px) {
     .risk-info .grid {
-        grid-template-columns: 1fr; /* Stack elements on small screens */
+        grid-template-columns: 1fr;
     }
 }
