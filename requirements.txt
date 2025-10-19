@@ -2,3 +2,7 @@ google-genai
 flask
 python-dotenv
 Pillow
+spacy
+sumy
+pyjwt
+requests

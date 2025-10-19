@@ -1,16 +1,13 @@
 # agents/risk_agent.py
 import json
-import re
 import uuid
+import re
 from typing import Dict, Any, Optional
 
 class RiskAgent:
     """
-    RiskAgent: convert classifier category scores + text features into:
-      - numeric risk score (0.0 - 1.0)
-      - risk level: Low / Medium / High
-      - reasons / contributions for explainability
-      - audit_id
+    RiskAgent: Calculates numeric risk score and risk level.
+    No longer decides actions.
     """
 
     DEFAULT_THRESHOLDS = {
@@ -34,7 +31,6 @@ class RiskAgent:
     LEVELS = {"low": 0.30, "medium": 0.70}
 
     def __init__(self, config_path: Optional[str] = None):
-        # load optional JSON config if provided (thresholds/weights/levels)
         self.thresholds = dict(self.DEFAULT_THRESHOLDS)
         self.weights = dict(self.DEFAULT_WEIGHTS)
         self.levels = dict(self.LEVELS)
@@ -47,10 +43,9 @@ class RiskAgent:
                 self.weights.update(cfg.get("weights", {}))
                 self.levels.update(cfg.get("levels", {}))
             except Exception:
-                # keep defaults if config unreadable
                 pass
 
-        # patterns for text-based boosts
+        # Patterns for small text-based boosts
         self._threat_patterns = [
             r"\bkill you\b", r"\bi will kill\b", r"\bi will hurt\b",
             r"\b(i want to die|kill myself|suicide)\b", r"\bmurder\b", r"\brape\b"
@@ -60,33 +55,13 @@ class RiskAgent:
         ]
 
     def evaluate(self, classification: Dict[str, Any], text: str = "") -> Dict[str, Any]:
-        """
-        Evaluate risk given classifier `classification` (dict category->0..1)
-        and optional plaintext `text`.
-        Returns dict: {
-          "score": float,
-          "level": "Low"/"Medium"/"High",
-          "reasons": [...],
-          "contributions": {category: contribution},
-          "top_contributors": [{category, contribution, score}],
-          "audit_id": str
-        }
-        """
         text_l = (text or "").lower()
-
-        # Normalize classification values
-        normalized = {}
-        for k, v in (classification or {}).items():
-            try:
-                normalized[k] = float(v)
-            except Exception:
-                normalized[k] = 0.0
+        normalized = {k: float(v or 0.0) for k, v in (classification or {}).items()}
 
         risk_score = 0.0
-        contributions = {}
         reasons = []
+        contributions = {}
 
-        # Combine weighted contributions for harmful categories only
         for cat, weight in self.weights.items():
             cat_score = normalized.get(cat, 0.0)
             contribution = round(cat_score * weight, 4)
@@ -96,35 +71,18 @@ class RiskAgent:
                 risk_score += contribution
                 reasons.append(f"{cat} > {threshold:.2f} (score {cat_score:.2f})")
 
-        # Text-based boosts
-        text_boost = self._evaluate_text_features(text_l)
-        if text_boost > 0:
-            risk_score += text_boost
-            reasons.append(f"text features boost +{text_boost:.2f}")
+        # Text-based boost
+        risk_score += self._evaluate_text_features(text_l)
+        risk_score = min(risk_score, 1.0)
 
-        # Keyword overrides / minimum risk for critical phrases
-        risk_score = self._apply_keyword_boosts(text_l, risk_score)
-
-        # clamp 0..1
-        risk_score = max(0.0, min(1.0, risk_score))
-
-        # risk level
         level = self._get_level(risk_score)
-
-        # top contributors list for explainability
-        sorted_contribs = sorted(contributions.items(), key=lambda x: x[1], reverse=True)
-        top_contributors = [
-            {"category": k, "contribution": v, "score": normalized.get(k, 0.0)}
-            for k, v in sorted_contribs if v > 0
-        ]
 
         return {
             "score": round(risk_score, 4),
             "level": level,
             "reasons": reasons,
-            "contributions": contributions,
-            "top_contributors": top_contributors,
-            "audit_id": str(uuid.uuid4())[:8]
+            "audit_id": str(uuid.uuid4())[:8],
+            "contributions": contributions
         }
 
     def _evaluate_text_features(self, text_l: str) -> float:
@@ -142,18 +100,6 @@ class RiskAgent:
         if text_l.isupper() and len(text_l) > 10:
             boost += 0.10
         return min(boost, 1.0)
-
-    def _apply_keyword_boosts(self, text_l: str, current_score: float) -> float:
-        # self-harm phrases => at least 0.85
-        if re.search(r"\b(kill myself|want to die|i want to die|suicide)\b", text_l):
-            return max(current_score, 0.85)
-        # direct threats => at least 0.8
-        if re.search(r"\b(i will kill you|i'm going to kill|i will murder|i will hurt you)\b", text_l):
-            return max(current_score, 0.80)
-        # sexual exploitation requests => at least 0.6
-        if re.search(r"\b(send nudes|send pics|show me nude|send pictures)\b", text_l):
-            return max(current_score, 0.6)
-        return current_score
 
     def _get_level(self, score: float) -> str:
         if score < self.levels.get("low", 0.3):
