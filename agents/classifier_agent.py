@@ -43,9 +43,13 @@ class ClassifierAgent:
         self.model_name = model_name or self.DEFAULT_MODEL
         # Initialize client (client reads GEMINI_API_KEY from env)
         api_key = os.getenv("GEMINI_API_KEY")
+        self.demo_mode = False
         if not api_key:
-            raise ValueError("GEMINI_API_KEY not found in environment variables.")
-        self.client = genai.Client()
+            # Enable demo mode so app can run without external API
+            self.demo_mode = True
+            self.client = None
+        else:
+            self.client = genai.Client()
 
         # Schema keys used by the rest of the app (keep consistent with UI)
         self.expected_keys = [
@@ -105,20 +109,24 @@ class ClassifierAgent:
             config = None
 
         try:
-            # Call the model
-            if config:
-                response = self.client.models.generate_content(
-                    model=self.model_name,
-                    contents=contents,
-                    config=config
-                )
-                raw_text = getattr(response, "text", "") or str(response)
+            # If demo mode, return heuristic, deterministic JSON without external calls
+            if getattr(self, "demo_mode", False):
+                raw_text = json.dumps(self._demo_classify(content if isinstance(content, str) else ""))
             else:
-                response = self.client.models.generate_content(
-                    model=self.model_name,
-                    contents=contents
-                )
-                raw_text = getattr(response, "text", "") or str(response)
+                # Call the model
+                if config:
+                    response = self.client.models.generate_content(
+                        model=self.model_name,
+                        contents=contents,
+                        config=config
+                    )
+                    raw_text = getattr(response, "text", "") or str(response)
+                else:
+                    response = self.client.models.generate_content(
+                        model=self.model_name,
+                        contents=contents
+                    )
+                    raw_text = getattr(response, "text", "") or str(response)
 
             # Defensive extract: sometimes the model adds commentary before/after JSON
             text = raw_text.strip()
@@ -161,6 +169,36 @@ class ClassifierAgent:
             return {"status": "error", "message": f"Gemini API error: {e}"}
         except Exception as e:
             return {"status": "error", "message": f"Classification failed: {e}"}
+
+    def _demo_classify(self, text: str) -> Dict[str, float]:
+        """Lightweight local heuristic for demo mode without external API."""
+        text_l = (text or "").lower()
+        scores = {k: 0.0 for k in self.expected_keys}
+
+        # Simple keyword heuristics
+        if any(p in text_l for p in ["kill", "hurt", "attack", "murder", "rape"]):
+            scores["violence"] = max(scores["violence"], 0.6)
+        if any(p in text_l for p in ["i will kill", "i will hurt", "threaten", "bomb"]):
+            scores["threat"] = max(scores["threat"], 0.7)
+        if any(p in text_l for p in ["fuck", "shit", "bitch", "asshole"]):
+            scores["profanity"] = max(scores["profanity"], 0.6)
+        if any(p in text_l for p in ["send nudes", "nude", "sex", "porn"]):
+            scores["sexual"] = max(scores["sexual"], 0.7)
+        if any(p in text_l for p in ["free", "click here", "buy now", "win prize", "subscribe"]):
+            scores["spam"] = max(scores["spam"], 0.6)
+        if any(p in text_l for p in ["idiot", "retard", "hate you", "stupid"]):
+            scores["hate_speech"] = max(scores["hate_speech"], 0.6)
+
+        # Slight boost for excessive exclamations or ALL CAPS
+        if text_l.count("!") > 3:
+            scores["profanity"] = max(scores["profanity"], 0.5)
+        if text and text.isupper() and len(text) > 8:
+            scores["hate_speech"] = max(scores["hate_speech"], 0.5)
+
+        # Clamp and round
+        for k in scores:
+            scores[k] = round(max(0.0, min(1.0, float(scores[k]))), 2)
+        return scores
 
     def _to_float_safe(self, v) -> float:
         """Convert various model outputs to float safely."""

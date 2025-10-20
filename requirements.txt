@@ -6,3 +6,4 @@ spacy
 sumy
 pyjwt
 requests
+reportlab

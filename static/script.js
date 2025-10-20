@@ -46,6 +46,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function initializeAuth() {
         try {
+            // Check if token exists in localStorage first
+            const storedToken = localStorage.getItem('authToken');
+            if (storedToken) {
+                authToken = storedToken;
+                console.log('✅ Using stored token');
+                return;
+            }
+
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 
@@ -60,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (data.token) {
                 authToken = data.token;
+                localStorage.setItem('authToken', data.token);
                 console.log('✅ Authentication successful');
             } else {
                 console.warn('⚠️ Authentication failed, proceeding without token');
@@ -425,3 +434,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+// Global function for audit dashboard (no auth)
+function openAuditDashboard() {
+    window.location.href = '/audit-dashboard';
+}
