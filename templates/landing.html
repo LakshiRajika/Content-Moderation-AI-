@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEnSORX | AI-Powered Content Moderation Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+        }
+        .glass-card {
+            background: rgba(45, 55, 72, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .feature-card {
+            background: rgba(45, 55, 72, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: rgba(45, 55, 72, 0.8);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+        .fade-in { animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .pulse-feature {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        .api-code {
+            background: rgba(26, 32, 44, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navigation -->
+    <nav class="glass-card rounded-2xl mx-4 mt-4 p-4">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg mr-3 flex items-center justify-center">
+                    <span class="text-white font-bold text-lg">C</span>
+                </div>
+                <span class="text-xl font-bold text-white">CEnSORX</span>
+            </div>
+            <div class="flex items-center space-x-6">
+                <a href="#home" class="text-gray-300 hover:text-white transition-colors">Home</a>
+                <a href="#about" class="text-gray-300 hover:text-white transition-colors">About Us</a>
+                <a href="#features" class="text-gray-300 hover:text-white transition-colors">Features</a>
+                <a href="#pricing" class="text-gray-300 hover:text-white transition-colors">Pricing</a>
+                <a href="#contact" class="text-gray-300 hover:text-white transition-colors">Contact Us</a>
+                <button onclick="window.location.href='/'" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-all duration-200">
+                    Try Demo
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="max-w-6xl mx-auto px-4 py-16">
+        <div class="text-center mb-16">
+            <div class="inline-flex items-center mb-6 px-4 py-2 bg-blue-500/20 rounded-full">
+                <span class="w-2 h-2 bg-blue-400 rounded-full mr-2 animate-pulse"></span>
+                <span class="text-blue-300 text-sm">Enterprise-Grade AI Safety</span>
+            </div>
+            
+            <h1 class="text-5xl md:text-6xl font-bold text-white mb-6">
+                CEnSORX
+                <span class="hero-gradient bg-clip-text text-transparent">AI Platform</span>
+            </h1>
+            
+            <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                Automatically detect and handle harmful, toxic, or risky content using advanced AI. 
+                Protect your platform from hate speech, harassment, spam, and unsafe user content.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="window.location.href='/'" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105">
+                    Try Live Demo
+                </button>
+                <button onclick="document.getElementById('pricing').scrollIntoView()" class="glass-card text-white font-semibold px-8 py-4 rounded-xl border border-gray-600 hover:border-blue-400 transition-all duration-200">
+                    View Pricing
+                </button>
+            </div>
+        </div>
+
+        <!-- Problem Statement -->
+        <div class="glass-card rounded-2xl p-8 mb-16">
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold text-white mb-4">The Challenge</h2>
+                    <p class="text-gray-300 mb-6">
+                        Social media platforms and online communities face increasing pressure to moderate content at scale. 
+                        Manual moderation is expensive, inconsistent, and can't keep up with the volume of user-generated content.
+                    </p>
+                    <div class="space-y-3">
+                        <div class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                            <span>Millions of posts need real-time analysis</span>
+                        </div>
+                        <div class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                            <span>Human moderators can't scale effectively</span>
+                        </div>
+                        <div class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                            <span>Regulatory compliance requires transparency</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div class="glass-card rounded-xl p-6 pulse-feature">
+                        <div class="text-4xl mb-4">📊</div>
+                        <div class="text-2xl font-bold text-white mb-2">99.9%</div>
+                        <div class="text-gray-400">Uptime SLA</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about" class="max-w-6xl mx-auto px-4 py-16">
+        <div class="glass-card rounded-2xl p-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-white mb-4">About CEnSORX</h2>
+                <p class="text-xl text-gray-300">Leading the future of AI-powered content moderation</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-2xl font-semibold text-white mb-6">Our Mission</h3>
+                    <p class="text-gray-300 mb-6">
+                        CEnSORX was founded with a simple yet powerful mission: to make the internet a safer place for everyone. 
+                        We believe that AI technology can help platforms maintain healthy, welcoming communities while 
+                        protecting users from harmful content.
+                    </p>
+                    <p class="text-gray-300 mb-6">
+                        Our advanced AI system combines multiple specialized agents to provide comprehensive content analysis, 
+                        risk assessment, and automated moderation decisions. We serve social media platforms, community forums, 
+                        and enterprise applications worldwide.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Trusted by leading social media platforms</span>
+                        </div>
+                        <div class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>99.9% uptime SLA guarantee</span>
+                        </div>
+                        <div class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Comprehensive audit trails for compliance</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-semibold text-white mb-6">Our Technology</h3>
+                    <div class="space-y-4">
+                        <div class="feature-card rounded-xl p-4">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center mr-3">
+                                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                    </svg>
+                                </div>
+                                <h4 class="text-lg font-semibold text-white">Google Gemini AI</h4>
+                            </div>
+                            <p class="text-gray-300 text-sm">Powered by cutting-edge language models for accurate content classification</p>
+                        </div>
+                        
+                        <div class="feature-card rounded-xl p-4">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center mr-3">
+                                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <h4 class="text-lg font-semibold text-white">Multi-Agent Architecture</h4>
+                            </div>
+                            <p class="text-gray-300 text-sm">Specialized AI agents working together for comprehensive analysis</p>
+                        </div>
+                        
+                        <div class="feature-card rounded-xl p-4">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center mr-3">
+                                    <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <h4 class="text-lg font-semibold text-white">Real-time Processing</h4>
+                            </div>
+                            <p class="text-gray-300 text-sm">Sub-second response times for seamless user experience</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="max-w-6xl mx-auto px-4 py-16">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-white mb-4">How It Works</h2>
+            <p class="text-xl text-gray-300">Our AI-powered system analyzes content through multiple specialized agents</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            <!-- Classification Agent -->
+            <div class="feature-card rounded-2xl p-6 fade-in">
+                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-white mb-3">AI Classification</h3>
+                <p class="text-gray-300 mb-4">
+                    Automatically categorizes content across multiple safety dimensions: violence, hate speech, profanity, sexual content, spam, and threats.
+                </p>
+                <div class="text-sm text-blue-400">Powered by Google Gemini AI</div>
+            </div>
+
+            <!-- Risk Assessment -->
+            <div class="feature-card rounded-2xl p-6 fade-in">
+                <div class="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-white mb-3">Risk Assessment</h3>
+                <p class="text-gray-300 mb-4">
+                    Calculates comprehensive risk scores and provides detailed reasoning for each decision, enabling transparent moderation policies.
+                </p>
+                <div class="text-sm text-yellow-400">Real-time scoring</div>
+            </div>
+
+            <!-- Action Determination -->
+            <div class="feature-card rounded-2xl p-6 fade-in">
+                <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-white mb-3">Automated Actions</h3>
+                <p class="text-gray-300 mb-4">
+                    Determines appropriate actions based on risk levels: approve, flag for review, or automatically remove harmful content.
+                </p>
+                <div class="text-sm text-green-400">Configurable policies</div>
+            </div>
+
+            <!-- NLP Processing -->
+            <div class="feature-card rounded-2xl p-6 fade-in">
+                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-white mb-3">NLP Analysis</h3>
+                <p class="text-gray-300 mb-4">
+                    Extracts entities, summarizes content, and provides contextual insights to enhance moderation decisions.
+                </p>
+                <div class="text-sm text-purple-400">Advanced text processing</div>
+            </div>
+
+            <!-- Historical Context -->
+            <div class="feature-card rounded-2xl p-6 fade-in">
+                <div class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-white mb-3">Historical Context</h3>
+                <p class="text-gray-300 mb-4">
+                    Learns from past decisions and finds similar content to ensure consistent moderation across your platform.
+                </p>
+                <div class="text-sm text-indigo-400">Continuous learning</div>
+            </div>
+
+            <!-- Audit Logging -->
+            <div class="feature-card rounded-2xl p-6 fade-in">
+                <div class="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-white mb-3">Complete Audit Trail</h3>
+                <p class="text-gray-300 mb-4">
+                    Logs every decision with full transparency, enabling compliance reporting and system optimization.
+                </p>
+                <div class="text-sm text-red-400">Regulatory compliance</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="max-w-6xl mx-auto px-4 py-16">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
+            <p class="text-xl text-gray-300">Choose the plan that fits your platform's needs</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Free Plan -->
+            <div class="feature-card rounded-2xl p-8 text-center">
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold text-white mb-2">Free Plan</h3>
+                    <div class="text-4xl font-bold text-green-400 mb-2">$0</div>
+                    <div class="text-gray-400">per month</div>
+                </div>
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Up to 500 moderation requests/month</span>
+                    </div>
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Basic AI classification</span>
+                    </div>
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>API access</span>
+                    </div>
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Perfect for testing</span>
+                    </div>
+                </div>
+                <button onclick="window.location.href='/'" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
+                    Start Free Trial
+                </button>
+            </div>
+
+            <!-- Standard Plan -->
+            <div class="feature-card rounded-2xl p-8 text-center border-2 border-blue-500 relative">
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold">Most Popular</span>
+                </div>
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold text-white mb-2">Standard Plan</h3>
+                    <div class="text-4xl font-bold text-blue-400 mb-2">$50</div>
+                    <div class="text-gray-400">per month</div>
+                </div>
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-blue-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Up to 10,000 requests/month</span>
+                    </div>
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-blue-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Advanced AI classification</span>
+                    </div>
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-blue-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Risk assessment & NLP analysis</span>
+                    </div>
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-blue-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Audit dashboard access</span>
+                    </div>
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-blue-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Email support</span>
+                    </div>
+                </div>
+                <button onclick="window.location.href='/'" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
+                    Get Started
+                </button>
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div class="feature-card rounded-2xl p-8 text-center">
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold text-white mb-2">Enterprise Plan</h3>
+                    <div class="text-4xl font-bold text-purple-400 mb-2">Custom</div>
+                    <div class="text-gray-400">pricing</div>
+                </div>
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-purple-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Unlimited requests</span>
+                    </div>
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-purple-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>All AI features included</span>
+                    </div>
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-purple-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Dedicated support</span>
+                    </div>
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-purple-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Custom integrations</span>
+                    </div>
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-purple-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>SLA guarantee</span>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('contact').scrollIntoView()" class="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
+                    Contact Sales
+                </button>
+            </div>
+        </div>
+
+        <div class="text-center mt-12">
+            <p class="text-gray-400 mb-4">All plans include API key authentication and usage tracking</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="window.location.href='/'" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-200">
+                    Try Free Plan
+                </button>
+                <button onclick="document.getElementById('contact').scrollIntoView()" class="glass-card text-white font-semibold px-8 py-3 rounded-lg border border-gray-600 hover:border-blue-400 transition-all duration-200">
+                    Discuss Enterprise Needs
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Target Users Section -->
+    <section class="max-w-6xl mx-auto px-4 py-16">
+        <div class="glass-card rounded-2xl p-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-white mb-4">Built for Social Media Companies</h2>
+                <p class="text-xl text-gray-300">Your system serves as a backend moderation service for platforms</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-2xl font-semibold text-white mb-6">Who Uses This System</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center mr-4 mt-1">
+                                <span class="text-blue-400 text-sm font-bold">1</span>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-white mb-2">Social Media Platforms</h4>
+                                <p class="text-gray-300">Facebook, Twitter (X), Instagram, TikTok, and local platforms like "SL Chat" integrate our API to moderate user posts before publication.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center mr-4 mt-1">
+                                <span class="text-green-400 text-sm font-bold">2</span>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-white mb-2">Community Platforms</h4>
+                                <p class="text-gray-300">Forums, chat applications, and user-generated content platforms use our service to maintain safe, welcoming environments.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center mr-4 mt-1">
+                                <span class="text-purple-400 text-sm font-bold">3</span>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-white mb-2">Enterprise Applications</h4>
+                                <p class="text-gray-300">Internal communication tools, customer support systems, and collaboration platforms ensure professional content standards.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-semibold text-white mb-6">How Integration Works</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>User submits content to your platform</span>
+                        </div>
+                        <div class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Your system sends content to our API</span>
+                        </div>
+                        <div class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>AI analyzes and returns risk assessment</span>
+                        </div>
+                        <div class="flex items-center text-gray-300">
+                            <svg class="w-5 h-5 text-blue-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Your platform takes appropriate action</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- API Section -->
+    <section id="api" class="max-w-6xl mx-auto px-4 py-16">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-white mb-4">Simple API Integration</h2>
+            <p class="text-xl text-gray-300">Easy-to-use REST API with comprehensive documentation</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <div class="glass-card rounded-2xl p-8">
+                <h3 class="text-2xl font-semibold text-white mb-6">Content Moderation Endpoint</h3>
+                <div class="api-code rounded-lg p-4 mb-6">
+                    <div class="text-green-400 text-sm mb-2">POST /moderate</div>
+                    <div class="text-gray-300 text-sm">
+                        <div>Content-Type: multipart/form-data</div>
+                        <div class="mt-2">
+                            <div>content: "User's text content"</div>
+                            <div>image: [optional image file]</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="api-code rounded-lg p-4 mb-6">
+                    <div class="text-blue-400 text-sm mb-2">Response:</div>
+                    <div class="text-gray-300 text-sm">
+                        <div>{</div>
+                        <div class="ml-4">"classification": {</div>
+                        <div class="ml-8">"violence": 0.1,</div>
+                        <div class="ml-8">"hate_speech": 0.0,</div>
+                        <div class="ml-8">"normal": 0.9</div>
+                        <div class="ml-4">},</div>
+                        <div class="ml-4">"risk_score": {</div>
+                        <div class="ml-8">"score": 0.1,</div>
+                        <div class="ml-8">"level": "Low"</div>
+                        <div class="ml-4">},</div>
+                        <div class="ml-4">"action": {</div>
+                        <div class="ml-8">"actions": ["approve"]</div>
+                        <div class="ml-4">}</div>
+                        <div>}</div>
+                    </div>
+                </div>
+
+                <button onclick="window.location.href='/'" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
+                    Try API Live
+                </button>
+            </div>
+
+            <div class="glass-card rounded-2xl p-8">
+                <h3 class="text-2xl font-semibold text-white mb-6">Audit Dashboard</h3>
+                <p class="text-gray-300 mb-6">
+                    Monitor all moderation decisions with our comprehensive audit dashboard. Track performance metrics, export reports, and ensure compliance.
+                </p>
+                
+                <div class="space-y-4 mb-6">
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <span>Real-time analytics and metrics</span>
+                    </div>
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <span>Export reports in CSV, JSON, PDF</span>
+                    </div>
+                    <div class="flex items-center text-gray-300">
+                        <svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <span>Complete audit trail for compliance</span>
+                    </div>
+                </div>
+
+                <button onclick="window.location.href='/audit-dashboard'" class="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
+                    View Dashboard
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Us Section -->
+    <section id="contact" class="max-w-6xl mx-auto px-4 py-16">
+        <div class="glass-card rounded-2xl p-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-white mb-4">Contact Us</h2>
+                <p class="text-xl text-gray-300">Get in touch with our team for support, sales, or partnership inquiries</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-2xl font-semibold text-white mb-6">Get in Touch</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center mr-4 mt-1">
+                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-white mb-1">Email Support</h4>
+                                <p class="text-gray-300">support@censorx.ai</p>
+                                <p class="text-gray-400 text-sm">24/7 technical support for all plans</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center mr-4 mt-1">
+                                <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-white mb-1">Sales Inquiries</h4>
+                                <p class="text-gray-300">sales@censorx.ai</p>
+                                <p class="text-gray-400 text-sm">Enterprise plans and custom solutions</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center mr-4 mt-1">
+                                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-white mb-1">API Documentation</h4>
+                                <p class="text-gray-300">docs.censorx.ai</p>
+                                <p class="text-gray-400 text-sm">Complete integration guides and examples</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-semibold text-white mb-6">Send us a Message</h3>
+                    <form class="space-y-4">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">First Name</label>
+                                <input type="text" class="w-full bg-gray-700/50 border border-gray-600 rounded-lg p-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="John">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Last Name</label>
+                                <input type="text" class="w-full bg-gray-700/50 border border-gray-600 rounded-lg p-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Doe">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                            <input type="email" class="w-full bg-gray-700/50 border border-gray-600 rounded-lg p-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="john@company.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Company</label>
+                            <input type="text" class="w-full bg-gray-700/50 border border-gray-600 rounded-lg p-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Your Company">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Subject</label>
+                            <select class="w-full bg-gray-700/50 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option>General Inquiry</option>
+                                <option>Sales & Pricing</option>
+                                <option>Technical Support</option>
+                                <option>Partnership</option>
+                                <option>Enterprise Solutions</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                            <textarea rows="4" class="w-full bg-gray-700/50 border border-gray-600 rounded-lg p-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Tell us about your needs..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="max-w-6xl mx-auto px-4 py-16">
+        <div class="hero-gradient rounded-2xl p-12 text-center">
+            <h2 class="text-4xl font-bold text-white mb-4">Ready to Protect Your Platform?</h2>
+            <p class="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+                Join leading social media companies using our AI-powered content moderation to maintain safe, welcoming communities.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="window.location.href='/'" class="bg-white text-blue-600 font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105">
+                    Start Free Trial
+                </button>
+                <button class="border-2 border-white text-white font-semibold px-8 py-4 rounded-xl transition-all duration-200 hover:bg-white hover:text-blue-600">
+                    Contact Sales
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="max-w-6xl mx-auto px-4 py-8">
+        <div class="glass-card rounded-2xl p-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg mr-3 flex items-center justify-center">
+                            <span class="text-white font-bold text-lg">C</span>
+                        </div>
+                        <span class="text-xl font-bold text-white">CEnSORX</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">
+                        Enterprise-grade AI solutions for content safety and platform protection.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Product</h4>
+                    <div class="space-y-2 text-sm text-gray-400">
+                        <div><a href="#" class="hover:text-white transition-colors">API Documentation</a></div>
+                        <div><a href="#" class="hover:text-white transition-colors">Audit Dashboard</a></div>
+                        <div><a href="#" class="hover:text-white transition-colors">Pricing</a></div>
+                        <div><a href="#" class="hover:text-white transition-colors">Status</a></div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Support</h4>
+                    <div class="space-y-2 text-sm text-gray-400">
+                        <div><a href="#" class="hover:text-white transition-colors">Help Center</a></div>
+                        <div><a href="#" class="hover:text-white transition-colors">Contact Support</a></div>
+                        <div><a href="#" class="hover:text-white transition-colors">API Status</a></div>
+                        <div><a href="#" class="hover:text-white transition-colors">SLA</a></div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Company</h4>
+                    <div class="space-y-2 text-sm text-gray-400">
+                        <div><a href="#" class="hover:text-white transition-colors">About</a></div>
+                        <div><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></div>
+                        <div><a href="#" class="hover:text-white transition-colors">Terms of Service</a></div>
+                        <div><a href="#" class="hover:text-white transition-colors">Security</a></div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
+                <p>&copy; 2024 CEnSORX. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

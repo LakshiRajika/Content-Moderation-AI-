@@ -41,6 +41,10 @@ HARMFUL_CATEGORIES = [
 def index():
     return render_template('index.html')
 
+@app.route('/landing')
+def landing():
+    return render_template('landing.html')
+
 @app.route('/api/auth/login', methods=['POST'])
 def login():
     """Authentication endpoint"""
