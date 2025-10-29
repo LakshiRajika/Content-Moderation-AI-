@@ -28,7 +28,7 @@ class RiskAgent:
         "threat": 0.80
     }
 
-    LEVELS = {"low": 0.30, "medium": 0.70}
+    LEVELS = {"low": 0.25, "medium": 0.60}
 
     def __init__(self, config_path: Optional[str] = None):
         self.thresholds = dict(self.DEFAULT_THRESHOLDS)
@@ -76,13 +76,26 @@ class RiskAgent:
         risk_score = min(risk_score, 1.0)
 
         level = self._get_level(risk_score)
+        # Ensure anything tripping a category threshold is not marked Low
+        if level == "Low" and reasons:
+            level = "Medium"
+
+        # Build top contributors list for downstream action selection
+        top_contributors = []
+        for cat, contribution in sorted(contributions.items(), key=lambda x: x[1], reverse=True):
+            top_contributors.append({
+                "category": cat,
+                "score": round(normalized.get(cat, 0.0), 4),
+                "contribution": round(contribution, 4)
+            })
 
         return {
             "score": round(risk_score, 4),
             "level": level,
             "reasons": reasons,
             "audit_id": str(uuid.uuid4())[:8],
-            "contributions": contributions
+            "contributions": contributions,
+            "top_contributors": top_contributors[:5]
         }
 
     def _evaluate_text_features(self, text_l: str) -> float:

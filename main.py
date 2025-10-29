@@ -11,6 +11,9 @@ from utils.retrieval_agent import RetrievalAgent
 from utils.security_middleware import security_middleware, token_required
 import time
 from google.genai import types
+import sqlite3
+import json
+from datetime import datetime
 
 load_dotenv()
 app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -36,6 +39,24 @@ HARMFUL_CATEGORIES = [
     'spam',
     'threat'
 ]
+
+def check_existing_review_decision(audit_id):
+    """Check if this audit item already has a review decision"""
+    try:
+        conn = sqlite3.connect(audit_agent.db_path)
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT event_description FROM system_events 
+            WHERE event_type = 'human_review_decision' 
+            AND metadata LIKE ?
+        ''', (f'%{audit_id}%',))
+        
+        result = cursor.fetchone()
+        conn.close()
+        return result is not None  # If we found a review decision, return True
+        
+    except Exception:
+        return False
 
 @app.route('/')
 def index():
@@ -101,7 +122,8 @@ def moderate_content():
         if content_type == 'text' and content_text:
             nlp_analysis = {
                 "entities": nlp_processor.extract_entities(content_text),
-                "summary": nlp_processor.summarize_content(content_text)
+                "summary": nlp_processor.summarize_content(content_text),
+                "sentiment": nlp_processor.analyze_sentiment(content_text)
             }
 
         # --- 2. Information Retrieval (NEW) ---
@@ -129,7 +151,7 @@ def moderate_content():
 
         # --- 6. Determine Actions ---
         action_start = time.time()
-        action_result = action_agent.determine_actions(risk_result, classification)
+        action_result = action_agent.determine_actions(risk_result, classification, nlp_analysis)
         action_time = int((time.time() - action_start) * 1000)
 
         # --- 7. Store in Retrieval System (NEW) ---
@@ -314,6 +336,151 @@ def get_agent_performance():
     try:
         metrics = audit_agent.get_agent_performance_metrics(days=days)
         return jsonify(metrics)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# --- REVIEW QUEUE ROUTES ---
+
+@app.route('/api/review/queue')
+def get_review_queue():
+    """Get pending review items - ONLY content explicitly flagged for human review"""
+    try:
+        # Get audit trail
+        audit_trail = audit_agent.get_detailed_audit_trail(limit=100)
+        
+        # Filter for content that was explicitly flagged for human review
+        review_queue = []
+        for item in audit_trail:
+            actions = item.get('actions_taken', [])
+            
+            # Check if content was explicitly flagged for human review
+            is_flagged = any('flag for human review' in str(action).lower() for action in actions)
+            
+            # Only include if explicitly flagged AND not already reviewed
+            if is_flagged:
+                # Check if this item already has a review decision
+                if not check_existing_review_decision(item.get('audit_id')):
+                    # Calculate metrics
+                    risk_score = item.get('risk_score', 0)
+                    classification = item.get('classification_scores', {})
+                    
+                    review_item = {
+                        "audit_id": item.get('audit_id'),
+                        "timestamp": item.get('timestamp'),
+                        "user_id": item.get('user_id'),
+                        "content_type": item.get('content_type'),
+                        "content_preview": item.get('content_preview'),
+                        "risk_score": risk_score,
+                        "risk_level": item.get('risk_level', ''),
+                        "classification": classification,
+                        "actions_taken": actions,
+                        "nlp_analysis": item.get('nlp_analysis'),
+                        "ai_confidence": min(95, 60 + (risk_score * 30)),
+                        "toxicity_score": max(
+                            classification.get('hate_speech', 0),
+                            classification.get('threat', 0),
+                            classification.get('violence', 0),
+                            classification.get('profanity', 0)
+                        ) * 100,
+                        "status": "pending"
+                    }
+                    review_queue.append(review_item)
+        
+        return jsonify(review_queue)
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/review/decision', methods=['POST'])
+def submit_review_decision():
+    """Submit human review decision and update the audit log"""
+    try:
+        data = request.json
+        audit_id = data.get('audit_id')
+        decision = data.get('decision')  # 'approve' or 'reject'
+        review_notes = data.get('review_notes', '')
+        
+        if not audit_id or decision not in ['approve', 'reject']:
+            return jsonify({"error": "Missing audit_id or invalid decision"}), 400
+
+        # Update the audit log with the review decision
+        conn = sqlite3.connect(audit_agent.db_path)
+        cursor = conn.cursor()
+        
+        # First, get the current actions
+        cursor.execute('SELECT actions_taken FROM audit_logs WHERE audit_id = ?', (audit_id,))
+        result = cursor.fetchone()
+        
+        if not result:
+            conn.close()
+            return jsonify({"error": "Audit record not found"}), 404
+
+        current_actions = json.loads(result[0])
+        
+        # Update actions based on decision
+        if decision == 'approve':
+            # Remove "Flag for human review" and add approval
+            new_actions = [action for action in current_actions if 'flag for human review' not in action.lower()]
+            new_actions.append('Approved by moderator')
+            final_decision = 'APPROVED'
+            action_message = 'Content approved and published'
+        else:
+            # Remove "Flag for human review" and add rejection
+            new_actions = [action for action in current_actions if 'flag for human review' not in action.lower()]
+            new_actions.append('Rejected by moderator')
+            new_actions.append('Content removed')
+            final_decision = 'REJECTED'
+            action_message = 'Content rejected and removed'
+        
+        # Update the audit log
+        cursor.execute('''
+            UPDATE audit_logs 
+            SET actions_taken = ?
+            WHERE audit_id = ?
+        ''', (json.dumps(new_actions), audit_id))
+        
+        conn.commit()
+        conn.close()
+        
+        # Log the human review decision
+        audit_agent.log_system_event(
+            event_type="human_review_decision",
+            event_description=f"Human review: {final_decision} - {review_notes}",
+            severity="INFO",
+            user_id="moderator",
+            metadata={
+                "audit_id": audit_id,
+                "decision": decision,
+                "review_notes": review_notes,
+                "reviewed_by": "moderator",
+                "timestamp": datetime.now().isoformat()
+            }
+        )
+        
+        return jsonify({
+            "status": "success",
+            "message": action_message,
+            "audit_id": audit_id
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/review/stats')
+def get_review_stats():
+    """Get review queue statistics"""
+    try:
+        review_queue = get_review_queue().get_json()
+        
+        stats = {
+            "pending_reviews": len(review_queue),
+            "high_priority": len([r for r in review_queue if r['risk_level'] == 'High']),
+            "medium_priority": len([r for r in review_queue if r['risk_level'] == 'Medium']),
+            "avg_toxicity": sum(r['toxicity_score'] for r in review_queue) / len(review_queue) if review_queue else 0
+        }
+        
+        return jsonify(stats)
+        
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

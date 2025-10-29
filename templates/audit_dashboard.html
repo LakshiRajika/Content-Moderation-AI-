@@ -28,6 +28,10 @@
             background: rgba(102, 126, 234, 0.2);
             transform: translateX(5px);
         }
+        .sidebar-item .badge {
+            transition: all 0.3s ease;
+            transform: scale(0.9);
+        }
         .sidebar-item.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -91,6 +95,16 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
                         </svg>
                         Audit Trail
+                    </div>
+                </button>
+
+                <button onclick="showSection('review')" class="sidebar-item w-full text-left p-3 rounded-lg text-gray-300" id="nav-review">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Review Queue
+                        <span id="review-badge" class="badge ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-1 hidden">0</span>
                     </div>
                 </button>
             </nav>
@@ -265,6 +279,84 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Review Queue Section -->
+            <div id="review-section" class="content-section">
+                <div class="mb-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-3xl font-bold text-white mb-2">Review Queue</h2>
+                            <p class="text-gray-400">Manually review flagged content</p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="glass-card rounded-xl px-4 py-2">
+                                <div class="text-sm text-gray-400">Pending Reviews</div>
+                                <div class="text-xl font-bold text-white" id="pending-count">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- Review Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="metric-card p-6 text-center">
+                        <h3 class="text-2xl font-bold text-red-400 mb-2" id="high-priority-count">0</h3>
+                        <p class="text-gray-400">High Priority</p>
+                    </div>
+                    <div class="metric-card p-6 text-center">
+                        <h3 class="text-2xl font-bold text-yellow-400 mb-2" id="medium-priority-count">0</h3>
+                        <p class="text-gray-400">Medium Priority</p>
+                    </div>
+                    <div class="metric-card p-6 text-center">
+                        <h3 class="text-2xl font-bold text-blue-400 mb-2" id="avg-toxicity">0%</h3>
+                        <p class="text-gray-400">Avg Toxicity</p>
+                    </div>
+                </div>
+            
+                <!-- Review Queue List -->
+                <div class="glass-card rounded-2xl overflow-hidden">
+                    <div class="p-6 border-b border-gray-700">
+                        <h3 class="text-xl font-semibold text-white">Flagged Content</h3>
+                    </div>
+                    <div id="review-queue-list" class="divide-y divide-gray-700">
+                        <!-- Review items will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal for review decision -->
+            <div id="review-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
+                <div class="glass-card rounded-2xl p-8 w-full max-w-lg mx-4">
+                    <h3 class="text-2xl font-semibold text-white mb-4">Submit Review Decision</h3>
+                    <p class="text-gray-400 mb-2">Audit ID: <span id="modal-audit-id" class="font-mono text-sm"></span></p>
+                    <div class="mb-4 p-4 bg-gray-800 rounded-lg">
+                        <p class="text-gray-300" id="modal-content-preview"></p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Decision</label>
+                        <select id="modal-decision" class="w-full bg-gray-700/50 border border-gray-600 rounded-lg p-3 text-white">
+                            <option value="approve">Approve Content</option>
+                            <option value="reject">Reject Content</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Review Notes (Optional)</label>
+                        <textarea id="modal-review-notes" rows="3" class="w-full bg-gray-700/50 border border-gray-600 rounded-lg p-3 text-white" placeholder="e.g., 'User warned, content is borderline but acceptable.'"></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-4">
+                        <button onclick="closeReviewModal()" class="px-6 py-2 bg-gray-600 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors">
+                            Cancel
+                        </button>
+                        <button onclick="submitDecision()" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg transition-colors">
+                            Submit Decision
+                        </button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -384,6 +476,8 @@
                 loadCharts();
             } else if (sectionName === 'trail') {
                 loadAuditTrail();
+            } else if (sectionName === 'review') {
+                loadReviewQueue();
             }
         }
 
@@ -405,6 +499,7 @@
                 
                 updateSummaryMetrics(data);
                 loadCharts();
+                updateReviewBadge();
             } catch (error) {
                 console.error('Error loading dashboard:', error);
                 // Load with empty data if API fails
@@ -675,6 +770,164 @@
             loadDashboard();
         }
 
+        async function updateReviewBadge() {
+            try {
+                const response = await fetch('/api/review/stats');
+                const stats = await response.json();
+                const badge = document.getElementById('review-badge');
+                if (stats.pending_reviews > 0) {
+                    badge.textContent = stats.pending_reviews;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Error updating review badge:', error);
+            }
+        }
+
+        async function loadReviewQueue() {
+            try {
+                const response = await fetch('/api/review/queue');
+                const reviewItems = await response.json();
+                
+                // Update stats
+                document.getElementById('pending-count').textContent = reviewItems.length;
+                document.getElementById('review-badge').textContent = reviewItems.length;
+                document.getElementById('review-badge').classList.toggle('hidden', reviewItems.length === 0);
+                
+                // Load stats
+                const statsResponse = await fetch('/api/review/stats');
+                const stats = await statsResponse.json();
+                
+                document.getElementById('high-priority-count').textContent = stats.high_priority || 0;
+                document.getElementById('medium-priority-count').textContent = stats.medium_priority || 0;
+                document.getElementById('avg-toxicity').textContent = Math.round(stats.avg_toxicity || 0) + '%';
+                
+                // Render review items
+                const queueContainer = document.getElementById('review-queue-list');
+                queueContainer.innerHTML = '';
+                
+                if (reviewItems.length === 0) {
+                    queueContainer.innerHTML = `
+                        <div class="p-8 text-center text-gray-500">
+                            <svg class="w-12 h-12 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p class="text-lg">No content pending review</p>
+                            <p class="text-sm">Flagged content will appear here for manual review</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                reviewItems.forEach(item => {
+                    const reviewItem = createReviewItem(item);
+                    queueContainer.appendChild(reviewItem);
+                });
+                
+            } catch (error) {
+                console.error('Error loading review queue:', error);
+            }
+        }
+
+        function createReviewItem(item) {
+            const div = document.createElement('div');
+            div.className = 'p-6 hover:bg-gray-700/30 transition-colors';
+            
+            const riskColor = item.risk_level === 'High' ? 'text-red-400' : 
+                             item.risk_level === 'Medium' ? 'text-yellow-400' : 'text-green-400';
+            
+            div.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <span class="${riskColor} font-semibold mr-3">${item.risk_level} Risk</span>
+                            <span class="text-sm text-gray-400">${new Date(item.timestamp).toLocaleString()}</span>
+                        </div>
+                        <p class="text-gray-300 mb-3 line-clamp-2">${item.content_preview || 'No content preview'}</p>
+                        
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <span class="px-2 py-1 bg-blue-500/20 text-blue-300 rounded text-xs">
+                                AI Confidence: ${Math.round(item.ai_confidence)}%
+                            </span>
+                            <span class="px-2 py-1 bg-red-500/20 text-red-300 rounded text-xs">
+                                Toxicity: ${Math.round(item.toxicity_score)}/100
+                            </span>
+                            <span class="px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs">
+                                Sentiment: ${item.sentiment}
+                            </span>
+                        </div>
+                    </div>
+                    <button onclick="openReviewModal('${item.audit_id}', \`${item.content_preview}\`)" 
+                            class="ml-4 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200">
+                        Review
+                    </button>
+                </div>
+                
+                <div class="text-sm text-gray-400">
+                    <div class="flex flex-wrap gap-4">
+                        <span>User: ${item.user_id}</span>
+                        <span>Type: ${item.content_type}</span>
+                        <span>Risk Score: ${item.risk_score.toFixed(3)}</span>
+                    </div>
+                </div>
+            `;
+            
+            return div;
+        }
+
+        function openReviewModal(auditId, contentPreview) {
+            document.getElementById('modal-audit-id').textContent = auditId;
+            document.getElementById('modal-content-preview').textContent = contentPreview;
+            document.getElementById('modal-decision').value = 'approve';
+            document.getElementById('modal-review-notes').value = '';
+            document.getElementById('review-modal').classList.remove('hidden');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('review-modal').classList.add('hidden');
+        }
+
+        async function submitDecision() {
+            const audit_id = document.getElementById('modal-audit-id').textContent;
+            const decision = document.getElementById('modal-decision').value;
+            const review_notes = document.getElementById('modal-review-notes').value;
+
+        try {
+            const response = await fetch('/api/review/decision', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                audit_id: audit_id, 
+                decision: decision, 
+                review_notes: review_notes 
+            })
+        });
+
+        const result = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(result.error || 'Failed to submit decision');
+        }
+
+        // Show success message
+        alert(`✅ ${result.message}`);
+        
+        // Close modal and refresh the queue
+        closeReviewModal();
+        loadReviewQueue(); // This will reload the queue without the reviewed item
+        updateReviewBadge();
+        
+        } catch (error) {
+                console.error('Error submitting review decision:', error);
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        
         async function exportReport(format) {
             try {
                 const timePeriod = document.getElementById('timePeriod').value;

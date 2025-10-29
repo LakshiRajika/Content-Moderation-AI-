@@ -168,14 +168,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update quick overview
         updateQuickOverview(riskLevel, classification, actions, riskScore);
         
-        // Update action banner
-        updateActionBanner(riskLevel, actions, data.action?.banner_message);
+        // Update action banner (with embedded explanation)
+        updateActionBanner(riskLevel, actions, data.action?.banner_message, data.action?.explanation);
         
         // Update detailed scores
         updateDetailedScores(classification);
         
         // Update NLP insights
-        updateNlpInsights(data.nlp_analysis);
+        const hasInsights = updateNlpInsights(data.nlp_analysis);
+        // Auto-expand details if insights are present
+        if (hasInsights) {
+            const isHidden = detailsContent.classList.contains('hidden');
+            if (isHidden) {
+                detailsContent.classList.remove('hidden');
+                detailsChevron.classList.add('rotate-180');
+            }
+        }
         
         // Update historical context
         updateHistoricalContext(data.historical_context);
@@ -217,10 +225,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function updateActionBanner(riskLevel, actions, bannerMessage) {
+    function updateActionBanner(riskLevel, actions, bannerMessage, explanation) {
         const bannerTitle = document.getElementById('banner-title');
         const bannerMessageEl = document.getElementById('banner-message');
         const bannerActions = document.getElementById('banner-actions');
+        const bannerExplanation = document.getElementById('banner-explanation');
 
         const bannerConfig = {
             'High': {
@@ -252,6 +261,9 @@ document.addEventListener('DOMContentLoaded', () => {
         bannerTitle.textContent = bannerConfig.title;
         bannerMessageEl.textContent = bannerMessage || bannerConfig.message;
         bannerActions.textContent = bannerConfig.action;
+        // Explanation text stays white; only the banner background changes with risk
+        bannerExplanation.className = 'text-sm mt-1 text-white/80';
+        bannerExplanation.textContent = (typeof explanation === 'string' && explanation.trim()) ? explanation : '';
 
         actionBanner.classList.remove('hidden');
     }
@@ -279,14 +291,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateNlpInsights(nlpData) {
         const entitiesContainer = document.getElementById('nlp-entities');
+        let hadInsights = false;
         
-        if (!nlpData || !nlpData.entities || Object.keys(nlpData.entities).length === 0) {
+        if (!nlpData) {
             entitiesContainer.innerHTML = '<p class="text-gray-500 italic">No specific insights detected</p>';
-            return;
+            return false;
         }
 
         let insightsHTML = '';
-        const entities = nlpData.entities;
+        // Add summary if available
+        if (nlpData.summary && typeof nlpData.summary === 'string' && nlpData.summary.trim()) {
+            insightsHTML += `
+                <div class="mb-3">
+                    <div class="text-xs text-gray-400 mb-1">Summary</div>
+                    <div class="text-gray-200 text-sm">${nlpData.summary}</div>
+                </div>
+            `;
+            hadInsights = true;
+        }
+
+        // Sentiment
+        if (nlpData.sentiment && typeof nlpData.sentiment === 'object') {
+            const s = nlpData.sentiment;
+            const label = (s.sentiment || '').toString();
+            const score = (typeof s.score === 'number') ? s.score : null;
+            const color = label === 'positive' ? 'text-green-300' : label === 'negative' ? 'text-red-300' : 'text-yellow-300';
+            const badge = label ? `<span class="px-2 py-0.5 rounded-full bg-white/10 ${color} text-xs capitalize">${label}</span>` : '';
+            const scoreText = (score !== null) ? `<span class="text-gray-300 text-xs ml-2">Score: ${score}</span>` : '';
+            insightsHTML += `
+                <div class="mb-3 flex items-center">
+                    <div class="text-xs text-gray-400 mr-2">Sentiment</div>
+                    ${badge}
+                    ${scoreText}
+                </div>
+            `;
+            hadInsights = true;
+        }
+
+        const entities = nlpData.entities || {};
 
         // People
         if (entities.persons && entities.persons.length > 0) {
@@ -300,6 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             `;
+            hadInsights = true;
         }
 
         // Organizations
@@ -314,6 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             `;
+            hadInsights = true;
         }
 
         // Locations
@@ -328,6 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             `;
+            hadInsights = true;
         }
 
         // Other entities
@@ -342,9 +387,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             `;
+            hadInsights = true;
         }
 
         entitiesContainer.innerHTML = insightsHTML || '<p class="text-gray-500 italic">No specific insights detected</p>';
+        return hadInsights;
     }
 
     function updateHistoricalContext(historicalData) {
