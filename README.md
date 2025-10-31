@@ -13,7 +13,7 @@
 
 CEnSORX is a comprehensive AI-powered content moderation platform that automatically detects and handles harmful, toxic, or risky content in real-time. Built with a multi-agent architecture, it helps social media companies, community platforms, and enterprises maintain safe online environments by automatically analyzing text and images across multiple safety categories.
 
-**Live Demo**: [https://your-demo-link.com](https://your-demo-link.com)
+**Live Demo**: [https://your-demo-link.com](https://drive.google.com/file/d/1yTWrKrtVAtxfqLJ_bnLdVbJOZIGy10wc/view?usp=sharing)
 
 ## 🚀 Key Features
 
