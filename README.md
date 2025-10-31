@@ -1,5 +1,38 @@
 # Content-Moderation-AI-
 
+# 🛡️ CEnSORX - AI Content Moderation Platform
+
+> Enterprise-grade AI content moderation for social media platforms and online communities
+
+![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
+![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)
+![Google Gemini](https://img.shields.io/badge/Google-Gemini_AI-orange.svg)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+
+## 📖 Project Overview
+
+CEnSORX is a comprehensive AI-powered content moderation platform that automatically detects and handles harmful, toxic, or risky content in real-time. Built with a multi-agent architecture, it helps social media companies, community platforms, and enterprises maintain safe online environments by automatically analyzing text and images across multiple safety categories.
+
+**Live Demo**: [https://your-demo-link.com](https://your-demo-link.com)
+
+## 🚀 Key Features
+
+### 🤖 AI-Powered Moderation
+- **Multi-Agent Pipeline** - Specialized agents for classification, risk assessment, and action determination
+- **Real-time Analysis** - Instant text and image moderation with sub-second response times
+- **Six Safety Categories** - Violence, hate speech, threats, explicit content, profanity, and spam detection
+
+### 📊 Management & Analytics
+- **Interactive Dashboard** - Comprehensive audit trail with visual analytics
+- **Human Review Queue** - Streamlined workflow for borderline cases
+- **Export Capabilities** - CSV, JSON, and PDF reports for compliance
+
+### 🔧 Enterprise Ready
+- **Configurable Rules** - Customizable thresholds and action mappings
+- **NLP Insights** - Entity extraction, sentiment analysis, and content summarization
+- **Security Features** - JWT authentication, input sanitization, audit logging
+
+
 ## Run locally
 
 1. Create and activate a virtual environment (Windows PowerShell):
