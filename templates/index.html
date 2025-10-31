@@ -3,145 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Content Moderation Engine</title>
-    <!-- Load Tailwind CSS -->
+    <title>CEnSORX | AI Content Moderation Demo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom styles to ensure the container scales nicely and provide dark mode feel */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a202c; /* Dark background */
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
         }
-        .text-input-group textarea {
-            min-height: 150px;
-            resize: vertical;
+        .glass-card {
+            background: rgba(45, 55, 72, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        /* Custom colors for score rings/bars (optional, Tailwind is preferred) */
-        .high-risk { color: #f56565; } /* red-500 */
-        .medium-risk { color: #f6ad55; } /* orange-400 */
-        .low-risk { color: #48bb78; } /* green-500 */
-        
-        /* Ensures the grid flows correctly on mobile */
-        @media (max-width: 640px) {
-            .scores-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        .risk-high { background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%); }
+        .risk-medium { background: linear-gradient(135deg, #feebc8 0%, #fbd38d 100%); }
+        .risk-low { background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%); }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
-    <!-- Link to the CSS file for custom overrides -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!-- Ensure your script.js is linked -->
-    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
-<body class="min-h-screen p-4 sm:p-8">
-
-    <div class="max-w-4xl mx-auto bg-gray-800 shadow-2xl rounded-xl p-6 sm:p-10 border border-gray-700">
-        
+<body class="min-h-screen p-4">
+    <div class="max-w-4xl mx-auto">
         <!-- Header -->
-        <header class="text-center mb-10">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                AI Content Moderation <span class="text-blue-400">Engine</span>
-            </h1>
-            <p class="text-gray-400 mt-2">Analyze text and images for safety compliance in real-time.</p>
+        <header class="text-center mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg mr-3 flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">C</span>
+                    </div>
+                    <span class="text-xl font-bold text-white">CEnSORX</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/landing" class="text-gray-300 hover:text-white transition-colors">About</a>
+                    <a href="/audit-dashboard" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
+                </div>
+            </div>
+            <div class="inline-flex items-center mb-4 px-4 py-2 bg-blue-500/20 rounded-full">
+                <span class="w-2 h-2 bg-blue-400 rounded-full mr-2 animate-pulse"></span>
+                <span class="text-blue-300 text-sm">AI-Powered Safety Analysis</span>
+            </div>
+            <h1 class="text-4xl font-bold text-white mb-2">Content Safety Checker</h1>
+            <p class="text-gray-400 text-lg">Quickly check if your content is safe and appropriate</p>
         </header>
 
-        <!-- Moderation Input Form -->
-        <section class="mb-10">
+        <!-- Main Input Card -->
+        <div class="glass-card rounded-2xl p-6 mb-6 shadow-xl">
+            <div class="flex items-start mb-4">
+                <div class="bg-blue-500/20 p-3 rounded-xl mr-4">
+                    <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-xl font-semibold text-white mb-1">Check Your Content</h2>
+                    <p class="text-gray-400">Paste text or upload an image to analyze for safety issues</p>
+                </div>
+            </div>
+
             <form id="moderation-form" enctype="multipart/form-data" class="space-y-4">
-                
-                <!-- Text Input -->
-                <div class="text-input-group">
-                    <label for="content-input" class="block text-sm font-medium text-gray-300 mb-2">Enter a Text or an Image:</label>
-                    <textarea id="content-input" rows="5" placeholder="Enter text content here (optional)..."
-                              class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg p-3 focus:ring-blue-500 focus:border-blue-500 transition duration-150"></textarea>
-                </div>
-
-                <!-- File Upload (Styled via custom CSS/Label) -->
-                <div class="file-upload-container">
-                    <!-- This is the custom-styled button the user sees -->
-                    <label for="image-input" class="custom-file-upload">
-                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                        <span id="file-name-display">Choose Image (Optional)</span>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        Content to Analyze
                     </label>
-                    <!-- This is the actual hidden file input -->
-                    <input type="file" id="image-input" accept="image/*">
+                    <textarea 
+                        id="content-input" 
+                        rows="4" 
+                        placeholder="Paste your text here... (Example: 'This is amazing content that should be safe for everyone')"
+                        class="w-full bg-gray-700/50 border border-gray-600 rounded-xl p-4 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    ></textarea>
                 </div>
 
-                <!-- Submit Button -->
-                <button type="submit"
-                        class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition duration-200 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50">
-                    CLASSIFY CONTENT
-                </button>
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <label for="image-input" class="custom-file-upload cursor-pointer flex items-center justify-center p-4 bg-gray-700/50 border-2 border-dashed border-gray-600 rounded-xl hover:border-blue-400 hover:bg-gray-700 transition-all duration-200">
+                            <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                            </svg>
+                            <span id="file-name-display" class="text-gray-400">Or upload an image</span>
+                        </label>
+                        <input type="file" id="image-input" accept="image/*" class="hidden">
+                    </div>
+                    <button 
+                        type="submit"
+                        class="ml-4 px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 focus:ring-4 focus:ring-blue-500/20 flex items-center"
+                    >
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Analyze Safety
+                    </button>
+                </div>
             </form>
-        </section>
+        </div>
 
-        <!-- Results Display Area -->
-        <section id="results-container">
-            <h2 class="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Analysis Results</h2>
+        <!-- Status Message -->
+        <div id="status-message" class="text-center text-gray-400 mb-6 py-4 rounded-xl glass-card">
+            <div class="flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Enter content above to check for safety issues
+            </div>
+        </div>
+
+        <!-- Quick Results Overview -->
+        <div id="quick-results" class="hidden glass-card rounded-2xl p-6 mb-6 fade-in">
+            <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Safety Overview
+            </h3>
             
-            <!-- Status Message -->
-            <p id="status-message" class="text-center italic text-gray-400 mb-6">Enter content and click 'CLASSIFY CONTENT' to begin analysis.</p>
-
-            <!-- Classification Scores Grid -->
-            <div class="scores-grid grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                <!-- Normal Score (Primary Metric) -->
-                <div class="p-4 bg-gray-700 rounded-lg shadow-inner border border-gray-600">
-                    <p class="text-sm font-medium text-gray-400">Normal Content</p>
-                    <p class="text-3xl font-bold mt-1" id="score-normal">--</p>
+            <div class="grid md:grid-cols-3 gap-4 mb-6">
+                <div class="text-center p-4 rounded-xl bg-gray-700/50">
+                    <div class="text-2xl font-bold text-white mb-1" id="overview-risk-level">--</div>
+                    <div class="text-sm text-gray-400">Safety Level</div>
                 </div>
+                <div class="text-center p-4 rounded-xl bg-gray-700/50">
+                    <div class="text-2xl font-bold text-white mb-1" id="overview-issues">--</div>
+                    <div class="text-sm text-gray-400">Issues Found</div>
+                </div>
+                <div class="text-center p-4 rounded-xl bg-gray-700/50">
+                    <div class="text-2xl font-bold text-white mb-1" id="overview-recommendation">--</div>
+                    <div class="text-sm text-gray-400">Recommendation</div>
+                </div>
+            </div>
+
+            <!-- Action Banner -->
+            <div id="action-banner" class="hidden p-4 rounded-xl mb-6 fade-in">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <div>
+                            <h4 class="font-semibold text-white" id="banner-title">Action Required</h4>
+                            <p class="text-sm text-white/80" id="banner-message">Content needs review</p>
+                            <p class="text-sm mt-1" id="banner-explanation"></p>
+                        </div>
+                    </div>
+                    <div class="text-sm font-semibold px-3 py-1 rounded-full bg-white/20 text-white" id="banner-actions">
+                        Review
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Analysis (Expandable) -->
+        <div class="space-y-4">
+            <!-- Safety Details Card -->
+            <div class="glass-card rounded-2xl p-6">
+                <button id="toggle-details" class="w-full flex items-center justify-between text-left">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                        <h3 class="text-lg font-semibold text-white">Safety Details</h3>
+                    </div>
+                    <svg id="details-chevron" class="w-5 h-5 text-gray-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
                 
-                <!-- Harmful Scores -->
-                <div class="p-4 bg-gray-700 rounded-lg shadow-inner border border-gray-600">
-                    <p class="text-sm font-medium text-gray-400">Hate Speech</p>
-                    <p class="text-xl font-bold mt-1 high-risk" id="score-hate_speech">--</p>
-                </div>
-                
-                <div class="p-4 bg-gray-700 rounded-lg shadow-inner border border-gray-600">
-                    <p class="text-sm font-medium text-gray-400">Threat/Harassment</p>
-                    <p class="text-xl font-bold mt-1 medium-risk" id="score-threat">--</p>
-                </div>
+                <div id="details-content" class="hidden mt-4 space-y-4">
+                    <!-- Safety Scores -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <div class="p-3 rounded-lg bg-gray-700/50 text-center">
+                            <div class="text-sm text-gray-400 mb-1">Violence</div>
+                            <div class="text-lg font-semibold text-white" id="score-violence">--</div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-gray-700/50 text-center">
+                            <div class="text-sm text-gray-400 mb-1">Hate Speech</div>
+                            <div class="text-lg font-semibold text-white" id="score-hate_speech">--</div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-gray-700/50 text-center">
+                            <div class="text-sm text-gray-400 mb-1">Threats</div>
+                            <div class="text-lg font-semibold text-white" id="score-threat">--</div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-gray-700/50 text-center">
+                            <div class="text-sm text-gray-400 mb-1">Explicit</div>
+                            <div class="text-lg font-semibold text-white" id="score-sexual">--</div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-gray-700/50 text-center">
+                            <div class="text-sm text-gray-400 mb-1">Profanity</div>
+                            <div class="text-lg font-semibold text-white" id="score-profanity">--</div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-gray-700/50 text-center">
+                            <div class="text-sm text-gray-400 mb-1">Spam</div>
+                            <div class="text-lg font-semibold text-white" id="score-spam">--</div>
+                        </div>
+                    </div>
 
-                <div class="p-4 bg-gray-700 rounded-lg shadow-inner border border-gray-600">
-                    <p class="text-sm font-medium text-gray-400">Violence</p>
-                    <p class="text-xl font-bold mt-1" id="score-violence">--</p>
-                </div>
-
-                <div class="p-4 bg-gray-700 rounded-lg shadow-inner border border-gray-600">
-                    <p class="text-sm font-medium text-gray-400">Profanity</p>
-                    <p class="text-xl font-bold mt-1" id="score-profanity">--</p>
-                </div>
-
-                <div class="p-4 bg-gray-700 rounded-lg shadow-inner border border-gray-600">
-                    <p class="text-sm font-medium text-gray-400">Sexual Content</p>
-                    <p class="text-xl font-bold mt-1" id="score-sexual">--</p>
-                </div>
-
-                <div class="p-4 bg-gray-700 rounded-lg shadow-inner border border-gray-600">
-                    <p class="text-sm font-medium text-gray-400">Spam</p>
-                    <p class="text-xl font-bold mt-1" id="score-spam">--</p>
+                    <!-- Content Insights -->
+                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <div class="p-4 rounded-xl bg-gray-700/50">
+                            <h4 class="font-semibold text-gray-300 mb-2 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                Content Insights
+                            </h4>
+                            <div id="nlp-entities" class="text-sm text-gray-300">
+                                <p class="text-gray-500 italic">No insights available</p>
+                            </div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-gray-700/50">
+                            <h4 class="font-semibold text-gray-300 mb-2 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Similar Past Content
+                            </h4>
+                            <div id="historical-content" class="text-sm text-gray-300">
+                                <p class="text-gray-500 italic">No similar content found</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <!-- Risk Summary -->
-           <!-- <div class="risk-info p-6 bg-gray-900 rounded-lg border border-red-500/30">
-                <h3 class="text-xl font-semibold text-red-400 mb-3">Moderation Decision</h3>
-                <div class="grid grid-cols-3 gap-4 text-gray-300">
-                    <div>
-                        <span class="text-sm font-medium block text-gray-500">Risk Level</span>
-                        <span id="risk-level" class="text-lg font-bold">--</span>
-                    </div>
-                    <div>
-                        <span class="text-sm font-medium block text-gray-500">Recommended Action</span>
-                        <span id="action-actions" class="text-lg font-bold">--</span>
-                    </div>
-                    <div>
-                        <span class="text-sm font-medium block text-gray-500">Audit ID</span>
-                        <span id="audit-id" class="text-lg font-bold truncate">--</span>
-                    </div>
-                </div>
-            </div>-->
-        </section>
+            <!-- Audit Dashboard Button -->
+            <div class="mt-6 text-center">
+                <button 
+                    id="audit-dashboard-btn"
+                    onclick="openAuditDashboard()"
+                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 focus:ring-4 focus:ring-purple-500/20"
+                >
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    Audit Dashboard
+                </button>
+            </div>
+        </div>
 
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-gray-500 text-sm">
+            <p>Powered by Advanced AI • Your content is processed securely</p>
+        </footer>
     </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
