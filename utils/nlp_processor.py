@@ -88,24 +88,42 @@ class NLPProcessor:
         return ". ".join(summary_sentences) + "."
     
     def analyze_sentiment(self, text: str) -> dict:
-        """Simple sentiment analysis using keyword matching"""
-        positive_words = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'love', 'like']
-        negative_words = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'dislike', 'angry', 'mad']
-        
+        """Lightweight sentiment analysis with safety-aware vocabulary and weighting"""
+        positive_words = [
+            'good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'love', 'like',
+            'safe', 'harmless', 'helpful', 'supportive'
+        ]
+        general_negative_words = [
+            'bad', 'terrible', 'awful', 'horrible', 'hate', 'dislike', 'angry', 'mad'
+        ]
+        safety_negative_words = [
+            'violence', 'violent', 'kill', 'murder', 'threat', 'threaten', 'attack', 'harm', 'hurt',
+            'shoot', 'stab', 'bomb', 'rape', 'abuse', 'terror', 'genocide', 'slur', 'lynch', 'execute'
+        ]
+
         text_lower = text.lower()
+
         positive_count = sum(1 for word in positive_words if word in text_lower)
-        negative_count = sum(1 for word in negative_words if word in text_lower)
-        
+        general_neg_count = sum(1 for word in general_negative_words if word in text_lower)
+        safety_neg_count = sum(1 for word in safety_negative_words if word in text_lower)
+
+        # Weight safety-related negatives more strongly
+        negative_count = general_neg_count + (2 * safety_neg_count)
+
         if positive_count > negative_count:
             sentiment = "positive"
         elif negative_count > positive_count:
             sentiment = "negative"
         else:
             sentiment = "neutral"
-        
+
+        # Score stays normalized by token count; include weights
+        token_count = max(len(text.split()), 1)
+        score = (positive_count - negative_count) / token_count
+
         return {
             "sentiment": sentiment,
             "positive_words": positive_count,
             "negative_words": negative_count,
-            "score": (positive_count - negative_count) / max(len(text.split()), 1)
+            "score": score
         }

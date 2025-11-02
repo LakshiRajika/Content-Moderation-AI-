@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDetailedScores(classification);
         
         // Update NLP insights
-        const hasInsights = updateNlpInsights(data.nlp_analysis);
+        const hasInsights = updateNlpInsights(data.nlp_analysis, riskLevel);
         // Auto-expand details if insights are present
         if (hasInsights) {
             const isHidden = detailsContent.classList.contains('hidden');
@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function updateNlpInsights(nlpData) {
+    function updateNlpInsights(nlpData, riskLevel) {
         const entitiesContainer = document.getElementById('nlp-entities');
         let hadInsights = false;
         
@@ -313,11 +313,23 @@ document.addEventListener('DOMContentLoaded', () => {
         // Sentiment
         if (nlpData.sentiment && typeof nlpData.sentiment === 'object') {
             const s = nlpData.sentiment;
-            const label = (s.sentiment || '').toString();
+            const rawLabel = (s.sentiment ?? '').toString();
+            const normLabel = rawLabel.trim().toLowerCase();
             const score = (typeof s.score === 'number') ? s.score : null;
-            const color = label === 'positive' ? 'text-green-300' : label === 'negative' ? 'text-red-300' : 'text-yellow-300';
-            const badge = label ? `<span class="px-2 py-0.5 rounded-full bg-white/10 ${color} text-xs capitalize">${label}</span>` : '';
-            const scoreText = (score !== null) ? `<span class="text-gray-300 text-xs ml-2">Score: ${score}</span>` : '';
+
+            const known = ['positive', 'negative', 'neutral'];
+            const derivedFromScore = (score === null) ? 'neutral' : (score > 0 ? 'positive' : score < 0 ? 'negative' : 'neutral');
+            let finalLabel = known.includes(normLabel) ? normLabel : derivedFromScore;
+
+            if (riskLevel === 'High') {
+                finalLabel = 'negative';
+            } else if (riskLevel === 'Medium') {
+                finalLabel = 'neutral';
+            }
+
+            const color = finalLabel === 'positive' ? 'text-green-300' : finalLabel === 'negative' ? 'text-red-300' : 'text-yellow-300';
+            const badge = `<span class="px-2 py-0.5 rounded-full bg-white/10 ${color} text-xs capitalize">${finalLabel}</span>`;
+            const scoreText = (score !== null) ? `<span class="text-gray-300 text-xs ml-2">Score: ${Number(score).toFixed(2)}</span>` : '';
             insightsHTML += `
                 <div class="mb-3 flex items-center">
                     <div class="text-xs text-gray-400 mr-2">Sentiment</div>
